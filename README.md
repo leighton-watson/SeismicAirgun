@@ -1,5 +1,5 @@
 # SeismicAirgun
-Lumped parameter seismic air gun code presented in Chelminski, Watson and Ronen (2019) Low frequency pneumatic seismic sources, Geophysical Prospecting.
+Lumped parameter seismic air gun code presented in Chelminski, Watson and Ronen (2019) Low frequency pneumatic seismic sources, Geophysical Prospecting, doi: [10.1111/1365-2478.12774](https://doi.org/10.1111/1365-2478.12774)
 
 ### What is this repository for? ###
 
