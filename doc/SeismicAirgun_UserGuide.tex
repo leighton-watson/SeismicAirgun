@@ -1,0 +1,144 @@
+\documentclass[10pt]{article}
+
+\usepackage{blindtext} % Package to generate dummy text throughout this template 
+
+\usepackage[sc]{mathpazo} % Use the Palatino font
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\linespread{1.05} % Line spacing - Palatino needs more space between lines
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+\usepackage[english]{babel} % Language hyphenation and typographical rules
+
+\usepackage[hmarginratio=1:1,top=32mm,columnsep=20pt]{geometry} % Document margins
+%\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption} % Custom captions under/above floats in tables or figures
+\usepackage[small,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage{sidecap}
+\usepackage{floatrow}
+
+\usepackage{booktabs} % Horizontal rules in tables
+
+\usepackage{enumitem} % Customized lists
+\setlist[itemize]{noitemsep} % Make itemize lists more compact
+
+\usepackage{abstract} % Allows abstract customization
+\renewcommand{\abstractnamefont}{\normalfont\bfseries} % Set the "Abstract" text to bold
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape} % Set the abstract itself to small italic text
+
+\usepackage{titlesec} % Allows customization of titles
+\renewcommand\thesection{\Roman{section}} % Roman numerals for the sections
+\renewcommand\thesubsection{\roman{subsection}} % roman numerals for subsections
+\titleformat{\section}[block]{\large\scshape\centering}{\thesection.}{1em}{} % Change the look of the section titles
+\titleformat{\subsection}[block]{\large}{\thesubsection.}{1em}{} % Change the look of the section titles
+
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyhead{} % Blank out the default header
+\fancyfoot{} % Blank out the default footer
+%\fancyhead[C]{CRes User Manual $\bullet$ 2019 $\bullet$ Watson} % Custom header text
+\fancyhead[C]{SeismicAirgun User Manual~~~$\bullet$~~~Watson~~~$\bullet$~~~2019} % Custom header text
+\fancyfoot[RO,LE]{\thepage} % Custom footer text
+
+\usepackage{titling} % Customizing the title section
+
+\usepackage{hyperref} % For hyperlinks in the PDF
+
+% math packages
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+% figure packages
+\usepackage{graphicx}
+
+\usepackage{natbib} % bibliography
+
+\usepackage{listings} % for including code snippets
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    %numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} % Article title closing formatting
+\title{SeismicAirgun User Guide} % Article title
+\author{%
+\textsc{Leighton M. Watson} \\% Your name
+\normalsize Stanford University \\ % Your institution
+\normalsize \href{mailto:leightonwatson@stanford.edu}{leightonwatson@stanford.edu} % Your email address
+%\and % Uncomment if 2 authors are required, duplicate these 4 lines if more
+%\textsc{Jane Smith}\thanks{Corresponding author} \\[1ex] % Second author's name
+%\normalsize University of Utah \\ % Second author's institution
+%\normalsize \href{mailto:jane@smith.com}{jane@smith.com} % Second author's email address
+}
+\date{\today} % Leave empty to omit a date
+\renewcommand{\maketitlehookd}{%
+}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+% Print the title
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+{\bf SeismicAirgun} computes airgun/bubble dynamics following a similar treatment to the seminal work of \citet{Ziolkowski1970}. A lumped parameter model is used where the internal properties of the airgun and bubbles are assumed to be spatially uniform. {\bf SeismicAirgun} is written in \texttt{MATLAB} and runs efficiently on a standard desktop/laptop computer. For more details and examples of the application of {\bf SeismicAirgun} see:
+\begin{itemize}
+\item Chelminski, S., Watson, L. M., and Ronen, S. (2019) Low-frequency pneumatic seismic sources, \emph{Geophysical Prospecting}, \href{https://doi.org/10.1111/1365-2478.12774}{https://doi.org/10.1111/1365-2478.12774}.
+\item Watson, L. M., Dunham, E. M., and Ronen, S. (2016) Numerical modeling of seismic airguns and low-pressure sources, \emph{SEG Technical Program Expanded Abstracts}, \href{https://doi.org/10.1190/segam2016-13846118.1}{https://doi.org/10.1190/segam2016-13846118.1}.
+\end{itemize}
+
+\section{Directory}
+\begin{itemize}
+\item {\bf demo} - script files for demonstration
+\item {\bf doc} - documentation including user guide and license file
+\item{\bf source} - function files associated with numerical implementation
+\end{itemize}
+
+{\bf SeismicAirgun} is freely available online at \href{https://github.com/leighton-watson/SeismicAirgun}{https://github.com/leighton-watson/SeismicAirgun} and is distributed under the MIT license (see \texttt{license.txt} for details). 
+
+
+\newpage
+\bibliographystyle{elsarticle-harv}
+\bibliography{/Users/lwat054/Documents/Stanford_University/Research/References/Bibliography/library.bib}
+
+\end{document}
+
+
+
+
