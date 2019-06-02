@@ -12,4 +12,7 @@
 # Files associated with figures
 *.eps
 *.ai
+*.png
+*.jpg
+*.jpeg
 Fig*pdf

@@ -125,12 +125,143 @@
 
 \section{Directory}
 \begin{itemize}
-\item {\bf demo} - script files for demonstration
-\item {\bf doc} - documentation including user guide and license file
-\item{\bf source} - function files associated with numerical implementation
+\item {\bf demo} - script files for demonstration.
+\item {\bf doc} - documentation including user guide and license file.
+\item{\bf source} - function files associated with numerical implementation. 
 \end{itemize}
 
 {\bf SeismicAirgun} is freely available online at \href{https://github.com/leighton-watson/SeismicAirgun}{https://github.com/leighton-watson/SeismicAirgun} and is distributed under the MIT license (see \texttt{license.txt} for details). 
+
+\section{Model Description}
+Here, I describe the mathematical model of {\bf SeismicAirgun}, which is a lumped parameter model where the internal properties of the airgun and bubble are assumed to be spatially uniform. The model can be divided into three components; i.) bubble, ii.) airgun, and iii.) acoustic radiation. For more details see \citet{Chelminski2019} and \citet{Watson2016} and the references therein. 
+
+\subsection{Bubble}
+The motion of the bubble wall is governed by the modified Herring equation \citep{Herring1941,Cole1948,Vokurka1986}:
+\begin{equation}
+R \ddot{R}+ \frac{3}{2} \dot{R}^2 = \frac{p_b - p_\infty}{\rho_\infty} + \frac{R}{\rho_\infty c_\infty} \dot{p_b},
+\label{eq:modified herring}
+\end{equation}
+where $R$, $\dot{R}=dR/dt$, and $\ddot{R}=d^2R/dt^2$ are the radius, velocity, and acceleration of the bubble wall, respectively, $p_b$ is the pressure inside the bubble, $\dot{p}_b = dp_b/dt$, and $p_\infty, \rho_\infty$ and $c_\infty$ are the pressure, density, and speed of sound, respectively, in the water infinitely far from the bubble. The ambient pressure at the depth of the airgun, $D$, is given by $p_\infty = p_\text{atm} = \rho_\infty g D$, where $p_\text{atm}$ is the atmospheric pressure and $g$ is the gravitational acceleration. 
+
+Mass flow from the airgun to the bubble is:
+\begin{equation}
+\frac{dm_b}{dt} = 
+  \begin{cases} 
+   p_a A \big( \frac{\gamma}{QT_a} \big)^{1/2} \big( \frac{2}{\gamma-1}\big)^{1/2} \bigg[ \big( \frac{p_a}{p_b}\big)^{(\gamma-1)/\gamma} - 1\bigg] & \text{if flow is unchoked}  \\
+   p_a A \big( \frac{\gamma}{QT_a} \big)^{1/2}       & \text{if flow is choked} 
+  \end{cases}
+\end{equation}
+where $m_b$ is the mass of the bubble, $A$ is the airgun port area, $Q$ is the specific gas constant, and $p_a$ and $T_a$ are the airgun pressure and temperature, respectively. Flow through the port is choked (choked flow is when the flow through a nozzle has a velocity equal to the sound speed, the maximum possible velocity for fluid flow through a nozzle) if \citep{Babu2014}
+\begin{equation}
+\frac{p_a}{p_b} \geq \bigg( \frac{\gamma+1}{2}\bigg)^{\gamma/(\gamma-1)},
+\end{equation}
+where $\gamma$ is the ratio of heat capacities. If the pressure ratio is less than this critical value then flow through the port will be unchoked. 
+
+The internal energy of the bubble, $E_b$, changes according to the first law of thermodynamics for an open system:
+\begin{equation}
+\frac{dE_b}{dt} = c_p T_a \frac{dm_b}{dt} - 4 \pi M \kappa R^2 (T_b - T_\infty) - p_b \frac{dV_b}{dt},
+\end{equation}
+where $c_p$ is the heat capacity at constant volume, $\kappa$ is the heat transfer coefficient, $M$ is a constant that accounts for the increased effective surface area over which heat transfer can occur as a result of turbulence at the bubble walls \citep{Laws1990}, and $V_b = (4/3) \pi R^3$ is the volume of the bubble, which is assumed to be spherical.
+
+\begin{figure}[t!]
+\centering
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={left,center},capbesidewidth=6cm}}]{figure}[\FBwidth]
+{\caption{Model schematic. The airgun and bubble are treated as lumped parameter objects. The internal properties are assumed to be spatially uniform and described by a single value that evolves in time. }
+\label{fig:schematic}}
+{\includegraphics[width=6cm]{schematic}}
+\end{figure}
+
+\subsection{Airgun}
+The airgun and bubble are coupled by conservation of mass:
+\begin{equation}
+\frac{dm_a}{dt} = -\frac{dm_b}{dt},
+\end{equation}
+where $m_a$ is the mass of air inside the airgun, and conservation of energy:
+\begin{equation}
+\frac{dE_a}{dt} = -c_p T_a \frac{dm_b}{dt},
+\end{equation}
+where $E_a$ is the internal energy of the airgun. 
+
+The airgun and bubble governing equations are closed with the ideal gas equation of state:
+\begin{equation}
+p = \frac{mQT}{V},
+\end{equation}
+and the relationship between the internal energy and temperature:
+\begin{equation}
+E = c_v m T,
+\end{equation}
+where $c_v$ is the heat capacity at constant volume. 
+
+\subsection{Acoustic Radiation}
+The pressure perturbation in the water is related to the bubble dynamics by \citep{Keller1956}
+\begin{equation}
+\Delta p(r,t) = \rho_\infty \bigg[ \frac{\ddot{V}(t-r/c_\infty)}{4\pi r} - \frac{\dot{V}(t-r/c_\infty)^2}{32\pi^2r^4} \bigg],
+\label{eq:acoustic radiation}
+\end{equation}
+where $\Delta p$ is the pressure perturbation in the water, $r$ is the distance from the center of the bubble to the receiver, and $V$ is the volume of the bubble. The second term on the right side is a near-field term that decays rapidly with distance. In addition to the direct arrival there is a ghost arrival, which is the initially upgoing wave that is reflected with negative polarity from the sea surface. For a receiver directly below the source the observed pressure perturbation is
+\begin{equation}
+\Delta p_\text{obs}(r,t) = \Delta p_D(r,t) - \Delta p_G(r+2D,t),
+\end{equation}
+where $\Delta p_D$ is the direct signal and $\Delta p_G$ is the ghost arrival, which is assumed to have -1 reflection coefficient from the sea surface. $D$ is the depth of the seismic airgun (Figure~\ref{fig:ghost}).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{ghost_arrival}
+\caption{Schematic showing direct and ghost arrivals along with example source signature from \citet{Watson2016}.}
+\label{fig:ghost}
+\end{figure}
+
+\section{Numerical Implementation}
+{\bf SeismicAirgun} solves a system of six ordinary differential equations using \texttt{MATLAB}'s built-in solver, \texttt{ode45}, which is explicit Runge-Kutta (4,5) method. The variables that are evolved are (1) $R$, bubble radius, (2) $\dot{R}$, bubble wall velocity, (3) $m_b$, the mass of bubble, $T_b$, temperature of bubble, (5) $p_a$, pressure inside the airgun, and (6) $m_a$, mass of air inside the airgun. 
+
+\section{Using {\bf SeismicAirgun}}
+The script file \texttt{AirgunBubbleEval.m} is used to run the code. In this file the firing properties of the airgun (pressure, volume, port area, depth and distance from source to receiver) are specified:
+\begin{lstlisting}[language=Matlab]
+airgunParams = [pressure, volume, port_area]; % specify firing configuration [psi, in^3, in^2]
+depth = 10; % depth of air gun [m]
+r = 75; % distance from source to receiver [m]
+physConst = physical_constants(depth,r); % load physical constants
+\end{lstlisting}
+
+The code is run by using one of the two following script files:
+\begin{lstlisting}[language=Matlab]
+AirgunBubbleSolve(airgunParams, physConst); %works for multiple firing configurations
+output = AirgunBubbleSolveOutput(airgunParams, physConst, false); %run solver and saves outputs (only works for a single firing configuration). True or false flag determines if solution is plotted or not.
+\end{lstlisting}
+There are two options for running the code. The first option is to use \texttt{AirgunBubbleSolve.m}. This function can handle multiple airgun properties (pressure, volume, port area) and will plot the modeled source signatures in the time and frequency domain. However, the outputs are not saved. The second option is \texttt{AirgunBubbleSolveOutput.m}. This function will save the simulation outputs to the current workspace but currently only works for a single set of airgun properties. The structure of the code is similar for the two options and is shown below.
+
+The airgun and bubble properties are initialized from the specified \texttt{airgunParams} and \texttt{physConst}:
+\begin{lstlisting}[language=Matlab]
+airgunInit = airgun_initialization(airgunParams(i,:), physConst); %air gun
+bubbleInit = bubble_initialization(airgunInit, physConst); %bubble
+\end{lstlisting}
+
+The initial conditions and parameters are saved into vectors that can be loaded into \texttt{ode45}:
+\begin{lstlisting}[language=Matlab]
+initCond = initCond_save(bubbleInit, airgunInit); %inital conditions [R,U,mb,Tb,pa,ma]
+params = params_save(bubbleInit, airgunInit, physConst); %save ambient water, airgun and bubble parameters into vector 
+\end{lstlisting}
+
+The governing equations for the airgun and bubble dynamics are specified in \texttt{modified\-\_herring\-\_eqn.m} and are solved using \texttt{ode45} starting from the initial conditions specified in the vector \texttt{initCond}:
+\begin{lstlisting}[language=Matlab]
+sol = ode45(@modified_herring_eqn, physConst.time, initCond, [], params);
+\end{lstlisting}
+
+Once the airgun and bubble dynamics are known, the pressure perturbation (source signature) in the water is computed by equation~\ref{eq:acoustic radiation}. In the current version of {\bf SeismicAirgun} the receiver is assumed to be directly below the source, and hence the ghost is calculated as having a propagation distance of \texttt{r+2D}:
+\begin{lstlisting}[language=Matlab]
+[tDir, pDir] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r); %direct arrival
+[tGhost, pGhost] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r + 2*physConst.depth); %ghost arrival
+\end{lstlisting}
+
+The direct and ghost arrivals are interpolated onto a common time vector (\texttt{tInterp}) and the pressure perturbation in the frequency domain is computed using \texttt{pressure\_spectra}.
+
+
+
+
+
+
+
+
 
 
 \newpage
