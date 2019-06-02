@@ -7,6 +7,9 @@ clear all;
 close all;
 clc;
 
+set(0,'DefaultLineLineWidth',2);
+set(0,'DefaultAxesFontSize',16);
+
 addpath source/
 
 % airgun firing configuration
@@ -18,19 +21,41 @@ physConst = physical_constants(depth, r); %load physical constants
 % run SEISMICAIRGUN
 output = AirgunBubbleSolveOutput(airgunParams, physConst, false);
 
-% display outputs
+%% display outputs %%
 
+% bubble radius
 figure(1); clf;
-%plot(output.t, output.R);
-plotyy(output.t, output.R, output.t, output.U);
+subplot(2,2,1);
+plot(output.t, output.R);
+xlabel('Time (s)');
+ylabel('m');
+title('(a) Bubble radius');
+ylim([0.2 0.8]);
+grid on;
 
-figure(2); clf;
-plot(output.tPres, output.pPres);
+% bubble wall velocity
+subplot(2,2,2);
+plot(output.t, output.U);
+xlabel('Time (s)');
+ylabel('m/s');
+title('(b) Bubble wall velocity');
+ylim([-18 35])
+grid on;
 
-figure(4); 
-plot(output.t, output.Y(3,:));
-hold on;
-plot(output.t, output.Y(6,:));
+% pressure perturbation (source signature) in time domain in bar m
+subplot(2,2,3);
+plot(output.tPres, output.pPres*r*1e-5);
+xlabel('Time (s)');
+ylabel('bar m');
+title('(c) Source signature');
+ylim([-5 6]);
+grid on;
 
-figure(3); clf;
+% pressure perturbation (source signature) in frequency domain
+subplot(2,2,4);
 loglog(output.f, output.P);
+xlabel('Frequency (Hz)');
+ylabel('dB re \mu Pa/Hz');
+title('(d) Source signature');
+xlim([1 1000]);
+grid on;
