@@ -17,13 +17,13 @@ src_props = [src_pressure, src_volume, src_area];
 
 % Physical Parameters
 r = 100; % distance from source to receiver. For purposes of ghost, receiver is assumed to be directly below source
-time = [0 6]; % time [s]
+time = [0 2]; % time [s]
 physConst = physical_constants(src_depth, r, time); % physical properties
 dt = 1.25e-5; % sampling interval
 
 % run solver
 % true or false flag determines if time series and spectra are plotted
-output = AirgunBubbleSolveOutput(src_props, physConst, dt, false); 
+output = AirgunBubbleSolveOutput(src_props, physConst, dt, true); 
 
 % direct arrival
 pDirBarM = output.pDir * 1e-5 * physConst.r;
@@ -40,11 +40,11 @@ directArrivalString = strcat('dirArr_',...
     num2str(src_depth),'m');
 
 % write as an ascii
-%save(directArrivalString,'pDirBarM','-ascii');
+save(directArrivalString,'pDirBarM','-ascii');
 
 % write as a binary
 directArrivalStringBin = strcat(directArrivalString,'.bin');
 fileID = fopen(directArrivalStringBin,'w');
-fwrite(fileID,pDirBarM);
+fwrite(fileID,pDirBarM,'single');
 fclose(fileID);
 
