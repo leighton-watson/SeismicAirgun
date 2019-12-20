@@ -1,11 +1,11 @@
-function output = AirgunBubbleSolveOutput(airgunParams, physConst, plot_solution)
+function output = AirgunBubbleSolveOutput(airgunParams, physConst, dt, plot_solution)
 %output = AirgunBubbleSolveOutput(airgunParams, physConst)
 %
 %Solves the equations governing the airgun/bubble behaviour. Variables ae
 %output. This code works for a single airgun firing configurations.
    
 % set default options
-if (nargin <= 2 || isempty(plot_solution)); plot_solution = true; end
+if (nargin <= 2 || isempty(plot_solution)); plot_solution = false; end
 
 airgunInit = airgun_initialization(airgunParams, physConst);
 bubbleInit = bubble_initialization(airgunInit, physConst);
@@ -28,7 +28,6 @@ A = solDY(2,:)'; %bubble wall acceleration
 [tGhost, pGhost] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, ... %ghost
     physConst.r + 2*physConst.depth);
 
-dt = 1e-4;
 tInterp = min(tDir):dt:min(max(tDir),physConst.time(end));
 pDirInterp = pchip(tDir, pDir, tInterp);
 pGhostInterp = pchip(tGhost, pGhost, tInterp);
@@ -55,6 +54,7 @@ output.tPres = tInterp;
 output.pDir = pDirInterp;
 output.pGhost = pGhostInterp;
 output.pPres = pPres;
+output.pPresBarM = pPresBarM;
 output.f = f;
 output.P = P;
 output.Psym = Psym;

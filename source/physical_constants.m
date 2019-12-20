@@ -1,8 +1,10 @@
-function physConst = physical_constants(depth, r)
+function physConst = physical_constants(depth, r, time)
 % physConst = physical_constants()
 
 %%%TIME%%%
-physConst.time = [0 1]; %time to integrate over [s]
+t1 = time(1); % minimum time
+t2 = time(2); % maximum time
+physConst.time = [t1 t2]; %time to integrate over [s]
 
 %%%THERMAL PROPERTIES%%%
 physConst.Rgas = 287.06; %specific gas constant for dry air [J/kgK]

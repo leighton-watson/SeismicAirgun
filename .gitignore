@@ -17,3 +17,7 @@
 *.jpeg
 Fig*pdf
 *converted-to.pdf
+
+# Output files
+*.bin
+*psi*
