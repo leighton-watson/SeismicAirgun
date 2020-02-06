@@ -8,7 +8,7 @@ MATLAB code for modeling seismic airgun and bubble dynamics with a lumped parame
 * Clone this repository to your local directory.
 * doc contains the user guide and license file
 * source contains the function files
-* **example.m** is a script file that runs the code and plots example model outputs.
+* **example_main.m** is a script file that runs the code and can save/plot model outputs.
 
 ### Who do I talk to? ###
 
