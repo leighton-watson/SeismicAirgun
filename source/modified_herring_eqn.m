@@ -10,10 +10,14 @@ T_bubble = Y(4);
 p_airgun = Y(5);
 m_airgun = Y(6);
 
+%variables about bubble position
+z = Y(7); %depth of bubble
+Rstar = Y(8); %integrate quantity of R^3
+
 %%%PARAMETERS
 Rgas = params(1);
 gamma = params(2);
-p_infty = params(3);
+p0 = params(3);
 rho_infty = params(4);
 T_infty = params(5);
 V_airgun = params(6);
@@ -25,6 +29,12 @@ kappa = params(11);
 c_infty = params(12);
 t_fire = params(13);
 init_m_airgun = params(14);
+massFracEjec = params(15);
+alpha = params(16);
+beta = params(17);
+
+g = 9.81;
+p_infty = p0 + g*rho_infty*z;
 
 %%%COMPUTE REQUIRED QUANTITIES
 mu = 1e-3;
@@ -46,8 +56,8 @@ pv = pv*1000; %vapor pressure [Pa]
 %% UPDATE VARIABLES %%
 
 %%%BUBBLE MASS%%%
-if (t < t_fire) && (m_airgun > 0.55*init_m_airgun) && (p_airgun > p_bubble); %airgun is firing
-    if p_airgun/p_bubble < ((gamma+1)/2)^(gamma/(gamma-1));
+if (t < t_fire) && (m_airgun > massFracEjec*init_m_airgun) && (p_airgun > p_bubble) %airgun is firing
+    if p_airgun/p_bubble < ((gamma+1)/2)^(gamma/(gamma-1))
         dm_bubble_dt = p_airgun*A*(gamma/(Rgas*T_infty))^(1/2)*...
             (2/(gamma-1))^(1/2)*((p_airgun/p_bubble)^((gamma-1)/gamma)-1)^(1/2);
     else
@@ -76,9 +86,15 @@ dp_bubble_dt = (Rgas/V_bubble^2)*(V_bubble*m_bubble*dT_bubble_dt +...
 dR_dt = U;
 
 %%%BUBBLE VELOCITY%%%
-dU_dt = (1/R)*(1/rho_infty*(p_bubble-p_infty+pv + R*dp_bubble_dt/c_infty) - 3/2*U^2);
+dU_dt = (1/R)*(1/rho_infty*(p_bubble-p_infty+pv + R*dp_bubble_dt/c_infty) - ...
+    3/2*U^2 - alpha*U);
+
+%%%BUOYANT VELOCITY%%%
+dzdt = beta*-2*g/(R^3) * Rstar;
+dRstardt = R^3;
 
 %% EVOLVE SOLUTION %%
 
 dYdt = [dR_dt; dU_dt; dm_bubble_dt; dT_bubble_dt;...
-    dp_airgun_dt; dm_airgun_dt];
+    dp_airgun_dt; dm_airgun_dt;...
+    dzdt; dRstardt];

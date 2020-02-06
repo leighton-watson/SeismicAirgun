@@ -1,4 +1,4 @@
-function physConst = physical_constants(depth, r, time)
+function physConst = physical_constants(depth, r, time, alpha, beta)
 % physConst = physical_constants()
 
 %%%TIME%%%
@@ -27,6 +27,11 @@ physConst.p_infty = physConst.p0 + physConst.rho_infty*physConst.g*physConst.dep
 physConst.T_infty = 273; %temperature infinitely far from bubble [K]
 physConst.c_infty = sqrt(physConst.n*((physConst.p_infty + physConst.B)/physConst.rho_infty)); %speed of sound in liquid infinitely far from bubble
 physConst.r = r; %distance from bubble to compute pressure field at [m]
+
+%%%TUNING PARAMETERS%%%
+physConst.massFracEjec = 0.05; % fraction of mass that is not ejected from source before port closes
+physConst.alpha = alpha; % damping parameter on governing equation
+physConst.beta = beta; % tuning parameter on buoyant velocity
 
 
 
