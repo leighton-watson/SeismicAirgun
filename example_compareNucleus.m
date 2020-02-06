@@ -29,7 +29,7 @@ disp(strcat('Pressure=',num2str(nucProp(i,1)),'psi'));
 disp(strcat('Volume=',num2str(nucProp(i,2)),'in^3'));
 
 figure(1); clf;
-subplot(2,1,1);
+subplot(1,2,1);
 plot(t, data(:,i),'-');
 xlabel('Time (s)');
 ylabel('Pressure (bar m)');
@@ -53,13 +53,14 @@ plot_outputs = false; % false = do not plot outputs, true = plot outputs
 output = SeismicAirgun(src_props, physConst, dt, plot_outputs);
 output.tPres = [0 output.tPres];
 output.pPresBarM = [0 output.pPresBarM];
-figure(1); hold on;
+figure(1); subplot(1,2,1); hold on;
 plot(output.tPres, output.pPresBarM,'LineStyle',':');
-legend('Nucleus','Simulation');
+legend('Nucleus','SeismicAirgun');
+title('(a) Source signature');
 
 % convert to frequency domain and plot
 [fData, PData, ~] = pressure_spectra(t, data(:,i)*1e5); % data (converted to Pa)
-subplot(2,1,2);
+subplot(1,2,2);
 semilogx(fData, PData);
 hold on;
 xlabel('Frequency (Hz)');
@@ -68,6 +69,7 @@ ylabel('dB re \mu Pa/Hz');
 
 [fSim, PSim, ~] = pressure_spectra(output.tPres(2:end), output.pDir); % simulation
 plot(fSim, PSim,':');
-legend('Nucleus','Simulation');
+legend('Nucleus','SeismicAirgun');
+title('(b) Source signature');
 xlim([1 1000])
 

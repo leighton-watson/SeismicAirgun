@@ -35,7 +35,7 @@
 \fancyhead{} % Blank out the default header
 \fancyfoot{} % Blank out the default footer
 %\fancyhead[C]{CRes User Manual $\bullet$ 2019 $\bullet$ Watson} % Custom header text
-\fancyhead[C]{SeismicAirgun User Manual~~~$\bullet$~~~Watson~~~$\bullet$~~~2019} % Custom header text
+\fancyhead[C]{SeismicAirgun User Manual~~~$\bullet$~~~Watson~~~$\bullet$~~~2020} % Custom header text
 \fancyfoot[RO,LE]{\thepage} % Custom footer text
 
 \usepackage{titling} % Customizing the title section
@@ -120,14 +120,15 @@
 {\bf SeismicAirgun} computes airgun/bubble dynamics following a similar treatment to the seminal work of \citet{Ziolkowski1970}. A lumped parameter model is used where the internal properties of the airgun and bubbles are assumed to be spatially uniform. {\bf SeismicAirgun} is written in \texttt{MATLAB} and runs efficiently on a standard desktop/laptop computer. For more details and examples of the application of {\bf SeismicAirgun} see:
 \begin{itemize}
 \item Chelminski, S., Watson, L. M., and Ronen, S. (2019) Low-frequency pneumatic seismic sources, \emph{Geophysical Prospecting}, \href{https://doi.org/10.1111/1365-2478.12774}{https://doi.org/10.1111/1365-2478.12774}.
+\item Watson, L. M., Jennings, J., and Ronen, S. (2017) Source designature of ocean-bottom node data using deterministic airgun modeling, \emph{SEG Technical Program Expanded Abstracts 2017}, 121-126, \href{https://doi.org/10.1190/segam2017-17750879.1}{https://doi.org/10.1190/segam2017-17750879.1}.
 \item Watson, L. M., Dunham, E. M., and Ronen, S. (2016) Numerical modeling of seismic airguns and low-pressure sources, \emph{SEG Technical Program Expanded Abstracts}, \href{https://doi.org/10.1190/segam2016-13846118.1}{https://doi.org/10.1190/\-segam2016-13846118.1}.
 \end{itemize}
 
 \section{Directory}
 \begin{itemize}
-\item {\bf demo} - script files for demonstration.
-\item {\bf doc} - documentation including user guide and license file.
 \item{\bf source} - function files associated with numerical implementation. 
+\item {\bf doc} - documentation including user guide and license file.
+\item {\bf references} - publications that are associated with this code.
 \end{itemize}
 
 {\bf SeismicAirgun} is freely available online at \href{https://github.com/leighton-watson/SeismicAirgun}{https://github.com/leighton-watson/SeismicAirgun} and is distributed under the MIT license (see \texttt{license.txt} for details). 
@@ -138,12 +139,20 @@ Here, I describe the mathematical model of {\bf SeismicAirgun}, which is a lumpe
 \subsection{Bubble}
 The motion of the bubble wall is governed by the modified Herring equation \citep{Herring1941,Cole1948,Vokurka1986}:
 \begin{equation}
-R \ddot{R}+ \frac{3}{2} \dot{R}^2 = \frac{p_b - p_\infty}{\rho_\infty} + \frac{R}{\rho_\infty c_\infty} \dot{p_b},
+R \ddot{R}+ \frac{3}{2} \dot{R}^2 = \frac{p_b - p_\infty}{\rho_\infty} + \frac{R}{\rho_\infty c_\infty} \dot{p_b} - \alpha \dot{R},
 \label{eq:modified herring}
 \end{equation}
-where $R$, $\dot{R}=dR/dt$, and $\ddot{R}=d^2R/dt^2$ are the radius, velocity, and acceleration of the bubble wall, respectively, $p_b$ is the pressure inside the bubble, $\dot{p}_b = dp_b/dt$, and $p_\infty, \rho_\infty$ and $c_\infty$ are the pressure, density, and speed of sound, respectively, in the water infinitely far from the bubble. The ambient pressure at the depth of the airgun, $D$, is given by $p_\infty = p_\text{atm} = \rho_\infty g D$, where $p_\text{atm}$ is the atmospheric pressure and $g$ is the gravitational acceleration. 
+where $R$, $\dot{R}=dR/dt$, and $\ddot{R}=d^2R/dt^2$ are the radius, velocity, and acceleration of the bubble wall, respectively, $p_b$ is the pressure inside the bubble, $\dot{p}_b = dp_b/dt$, and $p_\infty, \rho_\infty$ and $c_\infty$ are the pressure, density, and speed of sound, respectively, in the water infinitely far from the bubble. The ambient pressure at the depth of the airgun, $z$, is given by $p_\infty = p_\text{atm} = \rho_\infty g z$, where $p_\text{atm}$ is the atmospheric pressure and $g$ is the gravitational acceleration. Mechanical energy dissipation mechanisms, which are challenging to model directly, are parameterized into an extra damping term of the form of $\alpha \dot{R}$, where $\alpha$ is an empirically determined constant \cite{Langhammer1996,Watson2017_airgun}.
 
-Mass flow from the airgun to the bubble is:
+The bubble is initialized with a finite initial volume equal to the volume of the airgun. This is because the modified Herring equation (equation~\ref{eq:modified herring}) becomes singular when $R\rightarrow0$. The bubble wall velocity is initially zero and the bubble air is at the same temperature and pressure as the ambient water. The mass can then be calculated from equation~\ref{eq:ideal gas law}. For more discussion on the bubble initial conditions see \citet{Watson2019_airgun}.
+
+Mass is ejected from the airgun into the water forming a bubble if three conditions are met:
+\begin{enumerate}
+\item $t < t_\text{fire}$. This parameter can be used to imposed a finite discharge duration.
+\item $p_a(t) > p_b(t)$. The airgun only discharges if the pressure inside the source is larger than the pressure outside.
+\item $m_a(t) > F ~ m_{a0}$ where $m_a(t)$ is the mass in the airgun, $F\in[0,1]$ is a tunable parameter that controls the fraction of mass ejected from the airgun, and $m_{a0}$ is the initial mass in the airgun.
+\end{enumerate}
+Mass flow from the airgun to the bubble is given by:
 \begin{equation}
 \frac{dm_b}{dt} = 
   \begin{cases} 
@@ -162,6 +171,13 @@ The internal energy of the bubble, $E_b$, changes according to the first law of 
 \frac{dE_b}{dt} = c_p T_a \frac{dm_b}{dt} - 4 \pi M \kappa R^2 (T_b - T_\infty) - p_b \frac{dV_b}{dt},
 \end{equation}
 where $c_p$ is the heat capacity at constant volume, $\kappa$ is the heat transfer coefficient, $M$ is a constant that accounts for the increased effective surface area over which heat transfer can occur as a result of turbulence at the bubble walls \citep{Laws1990}, and $V_b = (4/3) \pi R^3$ is the volume of the bubble, which is assumed to be spherical.
+
+The bubble of air is less dense than the surrounding water and hence moves buoyantly upwards in the water column. The vertical velocity of the bubble is given by \cite{Herring1941, Taylor1942, Langhammer1996}
+\begin{equation}
+\frac{dz(t)}{dt} = \frac{-2 g \beta}{R(t)^3} \int_0^t R(\tau)^3~d\tau,
+\label{eq:depth}
+\end{equation}
+where $\beta$ is a tunable parameter.
 
 \begin{figure}[t!]
 \centering
@@ -213,58 +229,134 @@ where $\Delta p_D$ is the direct signal and $\Delta p_G$ is the ghost arrival, w
 \end{figure}
 
 \section{Numerical Implementation}
-{\bf SeismicAirgun} solves a system of six ordinary differential equations using \texttt{MATLAB}'s built-in solver, \texttt{ode45}, which is explicit Runge-Kutta (4,5) method. The variables that are evolved are (1) $R$, bubble radius, (2) $\dot{R}$, bubble wall velocity, (3) $m_b$, the mass of bubble, (4) $T_b$, temperature of bubble, (5) $p_a$, pressure inside the airgun, and (6) $m_a$, mass of air inside the airgun. 
+{\bf SeismicAirgun} solves a system of eight ordinary differential equations using \texttt{MATLAB}'s built-in solver, \texttt{ode45}, which is explicit Runge-Kutta (4,5) method. The variables that are evolved are (1) $R$, bubble radius, (2) $\dot{R}$, bubble wall velocity, (3) $m_b$, the mass of bubble, (4) $T_b$, temperature of bubble, (5) $p_a$, pressure inside the airgun, (6) $m_a$, mass of air inside the airgun, (7) $z$, depth of the bubble, and (8) the integrand in equation~\ref{eq:depth}.
 
-\section{Using {\bf SeismicAirgun}}
-The script file \texttt{example.m} demonstrates how to run the code. In this file the firing properties of the airgun (pressure, volume, port area, depth and distance from source to receiver) are specified:
-\begin{lstlisting}[language=Matlab]
-airgunParams = [pressure, volume, port_area]; % specify firing configuration [psi, in^3, in^2]
-depth = 10; % depth of air gun [m]
-r = 75; % distance from source to receiver [m]
-physConst = physical_constants(depth,r); % load physical constants
-\end{lstlisting}
-
-The code is run by using one of the two following script files:
-\begin{lstlisting}[language=Matlab]
-AirgunBubbleSolve(airgunParams, physConst); %works for multiple firing configurations
-output = AirgunBubbleSolveOutput(airgunParams, physConst, false); %run solver and saves outputs (only works for a single firing configuration). True or false flag determines if solution is plotted or not.
-\end{lstlisting}
-There are two options for running the code. The first option is to use \texttt{AirgunBubbleSolve.m}. This function can handle multiple airgun properties (pressure, volume, port area) and will plot the modeled source signatures in the time and frequency domain. However, the outputs are not saved. The second option is \texttt{AirgunBubbleSolveOutput.m}. This function will save the simulation outputs to the current workspace but currently only works for a single set of airgun properties. The structure of the code is similar for the two options and is shown below.
-
-The airgun and bubble properties are initialized from the specified \texttt{airgunParams} and \texttt{physConst}:
-\begin{lstlisting}[language=Matlab]
-airgunInit = airgun_initialization(airgunParams(i,:), physConst); %air gun
-bubbleInit = bubble_initialization(airgunInit, physConst); %bubble
-\end{lstlisting}
-
-The initial conditions and parameters are saved into vectors that can be loaded into \texttt{ode45}:
-\begin{lstlisting}[language=Matlab]
-initCond = initCond_save(bubbleInit, airgunInit); %inital conditions [R,U,mb,Tb,pa,ma]
-params = params_save(bubbleInit, airgunInit, physConst); %save ambient water, airgun and bubble parameters into vector 
-\end{lstlisting}
-The initial conditions on the airgun variables are determined from the specified \texttt{airgunParams}. The pressure is explicitly specified in \texttt{airgunParams} while the mass of air inside the airgun is calculated by assuming that the airgun temperature is equal to the ambient temperature in the water. This a reasonable assumption because the air is compressed on the source boat and then pumped to the airgun through umbilical cords that are suspended in the water, providing sufficient time for the air to equilibrate in temperature with the water.
-
-The bubble is initialized with a finite initial volume equal to the volume of the airgun. This is because the modified Herring equation (equation~\ref{eq:modified herring}) becomes singular when $R\rightarrow0$. The bubble wall velocity is initially zero and the bubble air is at the same temperature and pressure as the ambient water. The mass can then be calculated from equation~\ref{eq:ideal gas law}. For more discussion on the bubble initial conditions see \citet{Watson2019_airgun}.
-
-The governing equations for the airgun and bubble dynamics are specified in \texttt{modified\-\_herring\-\_eqn.m} and are solved using \texttt{ode45} starting from the initial conditions specified in the vector \texttt{initCond}:
-\begin{lstlisting}[language=Matlab]
-sol = ode45(@modified_herring_eqn, physConst.time, initCond, [], params);
-\end{lstlisting}
-
-Once the airgun and bubble dynamics are known, the pressure perturbation (source signature) in the water is computed by equation~\ref{eq:acoustic radiation}. In the current version of {\bf SeismicAirgun} the receiver is assumed to be directly below the source, and hence the ghost is calculated as having a propagation distance of \texttt{r+2D}:
-\begin{lstlisting}[language=Matlab]
-[tDir, pDir] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r); %direct arrival
-[tGhost, pGhost] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r + 2*physConst.depth); %ghost arrival
-\end{lstlisting}
-
-The direct and ghost arrivals are interpolated onto a common time vector (\texttt{tInterp}) and the pressure perturbation in the frequency domain is computed using \texttt{pressure\_spectra}. Example model outputs for a 1000~in$^3$ airgun pressurized to 1600~psi with a port area of 16~in$^2$ fired at a depth of 10~m are shown below in Figure~\ref{fig:example outputs}.
-
-\begin{figure}[h]
+\begin{figure}[b!]
 \centering
 \includegraphics[width=\textwidth]{example_outputs}
 \caption{Example model outputs for a 1000~in$^3$ airgun pressurized to 1600~psi with a port area of 16~in$^2$ fired at a depth of 10~m showing (a) bubble radius, (b) bubble wall velocity, and source signature (acoustic pressure perturbation in the water) in the (c) time and (d) frequency domains. The source signature in the time domain is displayed in bar m, which enables comparison between observations at different source-receiver distances.}
 \label{fig:example outputs}
 \end{figure}
+
+\newpage
+\section{Using {\bf SeismicAirgun}}
+Several example script files are include that demonstrate how to specific source properties, run the code, save and display the outputs, and compare the simulation results to \emph{Nucleus} signatures. The three example script files provided are:
+\begin{itemize}
+\item \texttt{example\_main.m}: shows how to specify source properties, run the code, display basic outputs, and save the simulation result.
+\item \texttt{example\_dispOutputs.m}: demonstrates how to plot other outputs from the simulation.
+\item \texttt{example\_compareNucleus.m}: compares the simulation results with \emph{Nucleus} data (contained in \texttt{nuc.csv} and \texttt{nucProperties.csv}).
+\end{itemize}
+
+\subsection{\texttt{example\_main.m}}
+The source contained is contained in the directory \texttt{source}. Therefore, the first thing to do is to point to this directory:
+\begin{lstlisting}[language=Matlab]
+addpath source/
+\end{lstlisting}
+
+The source firing properties are specified:
+\begin{lstlisting}[language=Matlab]
+% Source Firing Configuration
+src_pressure = 1000; % source pressure [psi]
+src_volume = 10000; % source volume [in^3]
+src_area = 80; % port area of source [in^2]
+src_depth = 10; % depth of source [m]
+% pressure (psi), volume (in^3), port/throat area (in^2)
+src_props = [src_pressure, src_volume, src_area]; 
+\end{lstlisting}
+
+Logical flags are used to determine if the user wants to direct arrival (no ghost) to be plotted (in time and frequency domains) and saved (in ascii and binary formats).
+\begin{lstlisting}[language=Matlab]
+% save direct arrival
+save_outputs = false; % false = do not save outputs, true = save outputs
+% plot direct arrival 
+plot_outputs = false; % false = do not plot outputs, true = plot outputs
+\end{lstlisting}
+
+There are several physical (distance from source to receiver, total simulation time, sampling interval) and tuning parameters ($\alpha$ in equation~\ref{eq:modified herring} and $\beta$ in equation~\ref{eq:depth}) that need to be specified. Parameters are saved to the structure \texttt{physConst} using the function file {physical\_constants}. The mass fraction ejected from the airgun, $F$, is directly specified in {physical\_constants}.
+\begin{lstlisting}[language=Matlab]
+% Physical and Tuning Parameters
+r = 100; % distance from source to receiver. 
+time = [0 2]; % time [s]
+alpha = 0.8; % tuning parameter - decay of amplitude of pressure perturbation
+beta = 0; % % tuning parameter - rate of ascent of bubble
+physConst = physical_constants(src_depth, r, time, alpha, beta); % physical constant
+dt = 1.25e-5; % sampling interval
+\end{lstlisting}
+
+The solver is run by calling \texttt{SeismicAirgun}:
+\begin{lstlisting}[language=Matlab]
+output = SeismicAirgun(src_props, physConst, dt, plot_outputs); 
+\end{lstlisting}
+Outputs can be saved in a variety of formats: ascii, binary and (work in progress) SEGY.
+
+\begin{figure}[b!]
+\centering
+\includegraphics[width=0.9\textwidth]{example_outputs2}
+\caption{Example model outputs for a 10,000~in$^3$ airgun pressurized to 1000~psi with a port area of 80~in$^2$ fired at a depth of 10~m showing (a) bubble mass and (b) temperature.}
+\label{fig:example outputs2}
+\end{figure}
+
+\subsection{\texttt{example\_dispOutputs.m}}
+This script file is very similar to \texttt{example\_main.m} with the addition of demonstrating how to plot additional outputs, such as mass and temperature of the bubble (Figure~\ref{fig:example outputs2}).
+
+\subsection{\texttt{example\_compareNucleus.m}}
+\emph{Nucleus} is a commercial airgun modeling software produced by PGS. The {\bf SeismicAirgun} git repository contains 65 example \emph{Nucleus} signatures (containing just the direct arrival). The source properties (pressure and volume) are contained in \texttt{nucProperties.csv} while the time series data is contained in \texttt{nuc.csv}.
+
+\texttt{example\_compareNucleus.m} compares the simulated signatures using {\bf SeismicAirgun} with the \emph{Nucleus} signatures. A similar comparison is presented in \citet{Watson2017_airgun}. The source pressure and volume are selected to match the \emph{Nucleus} values:
+\begin{lstlisting}[language=Matlab]
+src_pressure = nucProp(i,1); % source pressure [psi]
+src_volume = nucProp(i,2); % source volume [in^3]
+\end{lstlisting}
+The other parameter values are the port area (16 in$^2$), source depth (10~m), and the tuning parameters $\alpha$ (0.8), $\beta$, (1), and $F$ (0.05). {\bf SeismicAirgun} is able to provide a good match to \emph{Nucleus}, as shown in Figure~\ref{fig:example outputsNucleus}. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\textwidth]{example_outputsNucleus}
+\caption{Example model outputs for a 400~in$^3$ airgun pressurized to 2000~psi.}
+\label{fig:example outputsNucleus}
+\end{figure}
+
+Note that {\bf SeismicAirgun} is limited to a single source and cannot rigorously account for the complex interactions between bubbles generated by multiple sources in close proximity. 
+
+
+
+%
+%The code is run by using one of the two following script files:
+%\begin{lstlisting}[language=Matlab]
+%AirgunBubbleSolve(airgunParams, physConst); %works for multiple firing configurations
+%output = AirgunBubbleSolveOutput(airgunParams, physConst, false); %run solver and saves outputs (only works for a single firing configuration). True or false flag determines if solution is plotted or not.
+%\end{lstlisting}
+%There are two options for running the code. The first option is to use \texttt{AirgunBubbleSolve.m}. This function can handle multiple airgun properties (pressure, volume, port area) and will plot the modeled source signatures in the time and frequency domain. However, the outputs are not saved. The second option is \texttt{AirgunBubbleSolveOutput.m}. This function will save the simulation outputs to the current workspace but currently only works for a single set of airgun properties. The structure of the code is similar for the two options and is shown below.
+%
+%The airgun and bubble properties are initialized from the specified \texttt{airgunParams} and \texttt{physConst}:
+%\begin{lstlisting}[language=Matlab]
+%airgunInit = airgun_initialization(airgunParams(i,:), physConst); %air gun
+%bubbleInit = bubble_initialization(airgunInit, physConst); %bubble
+%\end{lstlisting}
+%
+%The initial conditions and parameters are saved into vectors that can be loaded into \texttt{ode45}:
+%\begin{lstlisting}[language=Matlab]
+%initCond = initCond_save(bubbleInit, airgunInit); %inital conditions [R,U,mb,Tb,pa,ma]
+%params = params_save(bubbleInit, airgunInit, physConst); %save ambient water, airgun and bubble parameters into vector 
+%\end{lstlisting}
+%The initial conditions on the airgun variables are determined from the specified \texttt{airgunParams}. The pressure is explicitly specified in \texttt{airgunParams} while the mass of air inside the airgun is calculated by assuming that the airgun temperature is equal to the ambient temperature in the water. This a reasonable assumption because the air is compressed on the source boat and then pumped to the airgun through umbilical cords that are suspended in the water, providing sufficient time for the air to equilibrate in temperature with the water.
+%
+%The bubble is initialized with a finite initial volume equal to the volume of the airgun. This is because the modified Herring equation (equation~\ref{eq:modified herring}) becomes singular when $R\rightarrow0$. The bubble wall velocity is initially zero and the bubble air is at the same temperature and pressure as the ambient water. The mass can then be calculated from equation~\ref{eq:ideal gas law}. For more discussion on the bubble initial conditions see \citet{Watson2019_airgun}.
+%
+%The governing equations for the airgun and bubble dynamics are specified in \texttt{modified\-\_herring\-\_eqn.m} and are solved using \texttt{ode45} starting from the initial conditions specified in the vector \texttt{initCond}:
+%\begin{lstlisting}[language=Matlab]
+%sol = ode45(@modified_herring_eqn, physConst.time, initCond, [], params);
+%\end{lstlisting}
+%
+%Once the airgun and bubble dynamics are known, the pressure perturbation (source signature) in the water is computed by equation~\ref{eq:acoustic radiation}. In the current version of {\bf SeismicAirgun} the receiver is assumed to be directly below the source, and hence the ghost is calculated as having a propagation distance of \texttt{r+2D}:
+%\begin{lstlisting}[language=Matlab]
+%[tDir, pDir] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r); %direct arrival
+%[tGhost, pGhost] = pressure_eqn(t, R, U, A, physConst.rho_infty, physConst.c_infty, physConst.r + 2*physConst.depth); %ghost arrival
+%\end{lstlisting}
+%
+%The direct and ghost arrivals are interpolated onto a common time vector (\texttt{tInterp}) and the pressure perturbation in the frequency domain is computed using \texttt{pressure\_spectra}. Example model outputs for a 1000~in$^3$ airgun pressurized to 1600~psi with a port area of 16~in$^2$ fired at a depth of 10~m are shown below in Figure~\ref{fig:example outputs}.
+
+
 
 \newpage
 \bibliographystyle{elsarticle-harv}

@@ -66,18 +66,19 @@ grid on;
 figure(2); clf;
 
 % mass
-subplot(2,1,1);
+subplot(1,2,1);
 plot(output.t, output.Y(3,:));
 xlabel('Time (s)');
 ylabel('kg');
-title('Mass');
+title('(a) Bubble Mass');
 grid on;
 xlim([0 0.5])
 
 % temperature
-subplot(2,1,2);
+subplot(1,2,2);
 plot(output.t, output.Y(4,:));
 xlabel('Time (s)');
 ylabel('K');
-title('Temperature');
+title('(b) Bubble Temperature');
+xlim([0 1])
 grid on;
