@@ -90,7 +90,11 @@ dU_dt = (1/R)*(1/rho_infty*(p_bubble-p_infty+pv + R*dp_bubble_dt/c_infty) - ...
     3/2*U^2 - alpha*U);
 
 %%%BUOYANT VELOCITY%%%
-dzdt = beta*-2*g/(R^3) * Rstar;
+if z > 0
+    dzdt = beta*-2*g/(R^3) * Rstar;
+else
+    dzdt = 0;
+end
 dRstardt = R^3;
 
 %% EVOLVE SOLUTION %%
