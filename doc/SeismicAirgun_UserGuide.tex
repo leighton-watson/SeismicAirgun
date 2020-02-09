@@ -119,9 +119,9 @@
 \section{Introduction}
 {\bf SeismicAirgun} computes airgun/bubble dynamics following a similar treatment to the seminal work of \citet{Ziolkowski1970}. A lumped parameter model is used where the internal properties of the airgun and bubbles are assumed to be spatially uniform. {\bf SeismicAirgun} is written in \texttt{MATLAB} and runs efficiently on a standard desktop/laptop computer. For more details and examples of the application of {\bf SeismicAirgun} see:
 \begin{itemize}
-\item Chelminski, S., Watson, L. M., and Ronen, S. (2019) Low-frequency pneumatic seismic sources, \emph{Geophysical Prospecting}, \href{https://doi.org/10.1111/1365-2478.12774}{https://doi.org/10.1111/1365-2478.12774}.
+\item Chelminski, S., Watson, L. M., and Ronen, S. (2019) Low-frequency pneumatic seismic sources, \emph{Geophysical Prospecting}, 1-10, \href{https://doi.org/10.1111/1365-2478.12774}{https://doi.org/10.1111/1365-2478.12774}.
 \item Watson, L. M., Jennings, J., and Ronen, S. (2017) Source designature of ocean-bottom node data using deterministic airgun modeling, \emph{SEG Technical Program Expanded Abstracts 2017}, 121-126, \href{https://doi.org/10.1190/segam2017-17750879.1}{https://doi.org/10.1190/segam2017-17750879.1}.
-\item Watson, L. M., Dunham, E. M., and Ronen, S. (2016) Numerical modeling of seismic airguns and low-pressure sources, \emph{SEG Technical Program Expanded Abstracts}, \href{https://doi.org/10.1190/segam2016-13846118.1}{https://doi.org/10.1190/\-segam2016-13846118.1}.
+\item Watson, L. M., Dunham, E. M., and Ronen, S. (2016) Numerical modeling of seismic airguns and low-pressure sources, \emph{SEG Technical Program Expanded Abstracts}, 219-224, \href{https://doi.org/10.1190/segam2016-13846118.1}{https://doi.org/10.1190/\-segam2016-13846118.1}.
 \end{itemize}
 
 \section{Directory}
@@ -133,6 +133,7 @@
 
 {\bf SeismicAirgun} is freely available online at \href{https://github.com/leighton-watson/SeismicAirgun}{https://github.com/leighton-watson/SeismicAirgun} and is distributed under the MIT license (see \texttt{license.txt} for details). 
 
+\newpage
 \section{Model Description}
 Here, I describe the mathematical model of {\bf SeismicAirgun}, which is a lumped parameter model where the internal properties of the airgun and bubble are assumed to be spatially uniform. The model can be divided into three components; i.) bubble, ii.) airgun, and iii.) acoustic radiation. For more details see \citet{Chelminski2019} and \citet{Watson2016} and the references therein. 
 
@@ -177,7 +178,7 @@ The bubble of air is less dense than the surrounding water and hence moves buoya
 \frac{dz(t)}{dt} = \frac{-2 g \beta}{R(t)^3} \int_0^t R(\tau)^3~d\tau,
 \label{eq:depth}
 \end{equation}
-where $\beta$ is a tunable parameter.
+where $\beta$ is a tunable parameter. As the bubble moves vertically upwards the pressure in the water, $p_\infty$, decreases which results in the bubble oscillating slower.
 
 \begin{figure}[t!]
 \centering
@@ -228,14 +229,32 @@ where $\Delta p_D$ is the direct signal and $\Delta p_G$ is the ghost arrival, w
 \label{fig:ghost}
 \end{figure}
 
+\newpage
 \section{Numerical Implementation}
 {\bf SeismicAirgun} solves a system of eight ordinary differential equations using \texttt{MATLAB}'s built-in solver, \texttt{ode45}, which is explicit Runge-Kutta (4,5) method. The variables that are evolved are (1) $R$, bubble radius, (2) $\dot{R}$, bubble wall velocity, (3) $m_b$, the mass of bubble, (4) $T_b$, temperature of bubble, (5) $p_a$, pressure inside the airgun, (6) $m_a$, mass of air inside the airgun, (7) $z$, depth of the bubble, and (8) the integrand in equation~\ref{eq:depth}.
 
-\begin{figure}[b!]
+\begin{figure}[t!]
 \centering
 \includegraphics[width=\textwidth]{example_outputs}
 \caption{Example model outputs for a 1000~in$^3$ airgun pressurized to 1600~psi with a port area of 16~in$^2$ fired at a depth of 10~m showing (a) bubble radius, (b) bubble wall velocity, and source signature (acoustic pressure perturbation in the water) in the (c) time and (d) frequency domains. The source signature in the time domain is displayed in bar m, which enables comparison between observations at different source-receiver distances.}
 \label{fig:example outputs}
+\end{figure}
+
+\newpage
+\section{Tuning Parameters}
+In addition to the source pressure, volume, depth and port area, there are three tuning parameters. Each parameter controls a different part of the source signature:
+\begin{itemize}
+\item $\alpha$: parameterization of additional damping terms. Controls amplitude decay of signature.
+\item $\beta$: controls the rate of ascent of the bubble. Influences the ambient pressure, $p_\infty$, and hence the bubble period. $\beta$ is especially important for the later bubble oscillations. 
+\item $F$: controls how much mass is ejected from the source. Influences the mass of bubble and hence bubble period. $F$ is especially important for the initial bubble oscillations. 
+\end{itemize}
+Figure~\ref{fig:tuning parameters} shows the influence of the tuning parameters on the source signature. Increasing $\alpha$ results in more a more rapidly damped source signature (Figure~\ref{fig:tuning parameters}a). Increasing $F$ means that less mass is ejected from the source. This results in a smaller bubble that oscillates faster (Figure~\ref{fig:tuning parameters}b). Increasing $\beta$ results in the bubble rising faster. This decreases the ambient pressure and causes the bubble to oscillate slower (Figure~\ref{fig:tuning parameters}c).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{tuningParams}
+\caption{Influence of tuning parameters on the simulated source signature for a 400~in$^2$ source at pressure of 2000~psi, port area of 10~in$^2$ and a depth of 7~m. (a) Varying damping parameter $\alpha$. (b) Varying fraction of mass ejected from source, $F$. (c) Varying ascent rate of bubble, $\beta$. (d) Depth of bubble as a function of time associated with signatures shown in (c).}
+\label{fig:tuning parameters}
 \end{figure}
 
 \newpage
@@ -277,10 +296,13 @@ There are several physical (distance from source to receiver, total simulation t
 % Physical and Tuning Parameters
 r = 100; % distance from source to receiver. 
 time = [0 2]; % time [s]
-alpha = 0.8; % tuning parameter - decay of amplitude of pressure perturbation
-beta = 0; % % tuning parameter - rate of ascent of bubble
-physConst = physical_constants(src_depth, r, time, alpha, beta); % physical constant
 dt = 1.25e-5; % sampling interval
+% tuning parameters
+alpha = 0.8; % decay of amplitude of pressure perturbation
+beta = 0.45; % rate of ascent of bubble
+F = 0.4; % fraction of mass that is not ejected from source
+physConst = physical_constants(src_depth, r, time, alpha, beta, F); % physical constant
+
 \end{lstlisting}
 
 The solver is run by calling \texttt{SeismicAirgun}:
@@ -289,7 +311,7 @@ output = SeismicAirgun(src_props, physConst, dt, plot_outputs);
 \end{lstlisting}
 Outputs can be saved in a variety of formats: ascii, binary and (work in progress) SEGY.
 
-\begin{figure}[b!]
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.9\textwidth]{example_outputs2}
 \caption{Example model outputs for a 10,000~in$^3$ airgun pressurized to 1000~psi with a port area of 80~in$^2$ fired at a depth of 10~m showing (a) bubble mass and (b) temperature.}
@@ -299,6 +321,13 @@ Outputs can be saved in a variety of formats: ascii, binary and (work in progres
 \subsection{\texttt{example\_dispOutputs.m}}
 This script file is very similar to \texttt{example\_main.m} with the addition of demonstrating how to plot additional outputs, such as mass and temperature of the bubble (Figure~\ref{fig:example outputs2}).
 
+\begin{figure}[b!]
+\centering
+\includegraphics[width=0.9\textwidth]{example_outputsNucleus}
+\caption{Example model outputs for a 400~in$^3$ airgun pressurized to 2000~psi. Source depth is 7~m and port area is assumed to be 10~in$^2$. Tuning parameters are $\alpha=0.8$, $\beta=0.45$ and $F=0.4$.}
+\label{fig:example outputsNucleus}
+\end{figure}
+
 \subsection{\texttt{example\_compareNucleus.m}}
 \emph{Nucleus} is a commercial airgun modeling software produced by PGS. The {\bf SeismicAirgun} git repository contains 65 example \emph{Nucleus} signatures (containing just the direct arrival). The source properties (pressure and volume) are contained in \texttt{nucProperties.csv} while the time series data is contained in \texttt{nuc.csv}.
 
@@ -307,14 +336,7 @@ This script file is very similar to \texttt{example\_main.m} with the addition o
 src_pressure = nucProp(i,1); % source pressure [psi]
 src_volume = nucProp(i,2); % source volume [in^3]
 \end{lstlisting}
-The other parameter values are the port area (16 in$^2$), source depth (10~m), and the tuning parameters $\alpha$ (0.8), $\beta$, (1), and $F$ (0.05). {\bf SeismicAirgun} is able to provide a good match to \emph{Nucleus}, as shown in Figure~\ref{fig:example outputsNucleus}. 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.9\textwidth]{example_outputsNucleus}
-\caption{Example model outputs for a 400~in$^3$ airgun pressurized to 2000~psi.}
-\label{fig:example outputsNucleus}
-\end{figure}
+The other parameter values are the port area, source depth, and the tuning parameters $\alpha$, $\beta$, and $F$. {\bf SeismicAirgun} is able to provide a good match to \emph{Nucleus}, as shown in Figure~\ref{fig:example outputsNucleus}. 
 
 Note that {\bf SeismicAirgun} is limited to a single source and cannot rigorously account for the complex interactions between bubbles generated by multiple sources in close proximity. 
 
