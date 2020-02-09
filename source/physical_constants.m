@@ -1,4 +1,4 @@
-function physConst = physical_constants(depth, r, time, alpha, beta)
+function physConst = physical_constants(depth, r, time, alpha, beta, F)
 % physConst = physical_constants()
 
 %%%TIME%%%
@@ -29,7 +29,7 @@ physConst.c_infty = sqrt(physConst.n*((physConst.p_infty + physConst.B)/physCons
 physConst.r = r; %distance from bubble to compute pressure field at [m]
 
 %%%TUNING PARAMETERS%%%
-physConst.massFracEjec = 0.05; % fraction of mass that is not ejected from source before port closes
+physConst.massFracEjec = F; % fraction of mass that is not ejected from source before port closes
 physConst.alpha = alpha; % damping parameter on governing equation
 physConst.beta = beta; % tuning parameter on buoyant velocity
 
